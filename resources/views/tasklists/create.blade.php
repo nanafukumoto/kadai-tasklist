@@ -6,6 +6,10 @@
 
     {!! Form::model($tasklist, ['route' => 'tasklists.store']) !!}
 
+        {!! Form::label('status','ステイタス:') !!}
+        {!! Form::text('status') !!}
+
+
         {!! Form::label('content', 'タスク:') !!}
         {!! Form::text('content') !!}
 
