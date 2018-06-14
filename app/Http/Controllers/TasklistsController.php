@@ -72,7 +72,8 @@ class TasklistsController extends Controller
 
         return view('tasklists.show', [
             'tasklist' => $tasklist,
-            ]);
+            'user' => \Auth::user(),
+        ]);
     }
 
     /**
