@@ -17,17 +17,19 @@ class TasklistsController extends Controller
      */
     public function index()
     {
-         $data = [];
+        $data =[];
         if (\Auth::check()) {
             $user = \Auth::user();
-            $tasklists = $user->tasklists()->orderBy('created_at', 'desc')->paginate(10);
-
+            $tasklists = $user->tasklists()->orderBy('created_at','desc')->paginate(10);
+            
             $data = [
-                'user' => $user,
+                'user'=> $user,
                 'tasklists' => $tasklists,
-            ];
-            $data += $this->counts($user);
-            return view('tasklists.index', $data);
+                ];
+                
+            $data += $this -> counts($user);
+            return view('tasklists.index',$data);
+                
         }else {
             return view('welcome');
         }
@@ -55,18 +57,21 @@ class TasklistsController extends Controller
      */
     public function store(Request $request)
     {
+        
          $this->validate($request, [
             'content' => 'required|max:191',
-            'status' =>  'required|max:191',
+            'status' =>  'required|max:10',
         ]);
-        $tasklist= new Tasklist;
-        $request->user()->tasklists()->create([
-            'content' => $request->content,
-            'status'=>$request->status,
+        $tasklist = new Tasklist;
+         $request->user()->tasklists()->create([
+               'content' => $request->content, 
+               'status' => $request->status,  
         ]);
-
+       
+      
         return redirect('/');
-    }
+       }
+    
 
     /**
      * Display the specified resource.
@@ -78,12 +83,14 @@ class TasklistsController extends Controller
     {
         $tasklist = Tasklist::find($id);
         
-        return view('tasklists.show', [
-            'tasklist' => $tasklist,
-    //        'user' => \Auth::user(),
-       ]);
+        if ($tasklist ->user_id == \Auth::user()->id)
+            return view('tasklists.show', [
+            'tasklist' => $tasklist,]);
+        
+        else {
+            return redirect('/');
+        }
     }
-
     /**
      * Show the form for editing the specified resource.
      *
@@ -93,11 +100,15 @@ class TasklistsController extends Controller
     public function edit($id)
     {
         $tasklist = Tasklist::find($id);
-
-        return view('tasklists.edit', [
+        
+     if ($tasklist ->user_id ==\Auth::user()->id)
+         return view('tasklists.edit', [
             'tasklist' => $tasklist,
         ]);
+        else {
+            return redirect('/');
     }
+}
 
     /**
      * Update the specified resource in storage.
@@ -108,17 +119,20 @@ class TasklistsController extends Controller
      */
     public function update(Request $request, $id)
     {
+        
+        
         $this->validate($request,[
              'status' => 'required|max:10',
-             'content' => 'required|max:10',
+             'content' => 'required|max:191',
             ]);
         
         $tasklist = Tasklist::find($id);
         $tasklist->status =$request->status;
         $tasklist->content = $request->content;
         $tasklist->save();
-
+       
         return redirect('/');
+        
     }
 
     /**
@@ -129,12 +143,13 @@ class TasklistsController extends Controller
      */
     public function destroy($id)
     {
-         $tasklist = \App\Tasklist::find($id);
+         $tasklist = Tasklist::find($id);
 
-        if (\Auth::id() === $tasklist->user_id) {
+        if (\Auth::user()->id === $tasklist->user_id) {
             $tasklist->delete();
         }
-
+    
         return redirect('/');
     }
+
 }
